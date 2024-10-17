@@ -5,7 +5,12 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class Registro_Activity : AppCompatActivity() {
@@ -54,12 +59,53 @@ class Registro_Activity : AppCompatActivity() {
                 else -> "No especificado"
             }
 
+            if(nombre.isNotEmpty() && apellidoP.isNotEmpty() && apellidoM.isNotEmpty()
+                && edadUsuario.isNotEmpty() && fechaNac.isNotEmpty() && correoUsuario.isNotEmpty()
+                && contrasenaUsuario.isNotEmpty()){
+
+                val nuevoUsuario = Usuarios(
+                    id_usuario = 0,
+                    nombre = nombre,
+                    apPaterno = apellidoP,
+                    apMaterno = apellidoM,
+                    edad = edadUsuario,
+                    genero = generoSeleccionado,
+                    correo = correoUsuario,
+                    contrasena = contrasenaUsuario,
+                    fechaNacimiento = fechaNac
+                )
+
+                registrarUsuario(nuevoUsuario)
+            }else{
+                Toast.makeText(this, "Por favor llene los campos", Toast.LENGTH_LONG).show()
+            }
 
         }
 
         cancelar.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
+        }
+    }
+
+    private fun registrarUsuario(usuarios: Usuarios){
+        CoroutineScope(Dispatchers.IO).launch {
+            try{
+                val response = RetrofitClient.webService.agregarUsuarios(usuarios)
+                withContext(Dispatchers.Main){
+                    if(response.isSuccessful){
+                        Toast.makeText(this@Registro_Activity, "Registro con Exito", Toast.LENGTH_LONG).show()
+                        val intent = Intent(this@Registro_Activity, MainActivity::class.java)
+                        startActivity(intent)
+                    }else{
+                        Toast.makeText(this@Registro_Activity, "Fallo el registro", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }catch (e: Exception){
+                withContext(Dispatchers.Main){
+                    Toast.makeText(this@Registro_Activity, "Error de conexion: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 }
