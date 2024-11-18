@@ -1,5 +1,6 @@
 package com.example.proyectofinal
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -11,6 +12,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 
 class Registro_Activity : AppCompatActivity() {
@@ -21,7 +26,7 @@ class Registro_Activity : AppCompatActivity() {
     private lateinit var apellidoPaterno: EditText
     private lateinit var apellidoMaterno: EditText
     private lateinit var edad: EditText
-    private lateinit var fechaNacimiento: EditText
+    private lateinit var fechaNacimiento: Button
     private lateinit var correo: EditText
     private lateinit var contrasena: EditText
     private lateinit var radioGenero: RadioGroup
@@ -40,6 +45,10 @@ class Registro_Activity : AppCompatActivity() {
         correo = findViewById(R.id.Correo)
         contrasena = findViewById(R.id.Contrasena)
         radioGenero = findViewById(R.id.radioGenero)
+
+        fechaNacimiento.setOnClickListener{
+            showDatePickerDialog()
+        }
 
         registrar.setOnClickListener {
 
@@ -86,6 +95,20 @@ class Registro_Activity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    private fun showDatePickerDialog(){
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = DatePickerDialog(this, {_, selectedYear, selectedMonth, selectedDay ->
+          val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).
+          format(Date(selectedYear-1900,selectedMonth,selectedDay))
+            fechaNacimiento.text = formattedDate
+        },year,month,day)
+        datePickerDialog.show()
     }
 
     private fun registrarUsuario(usuarios: Usuarios){
